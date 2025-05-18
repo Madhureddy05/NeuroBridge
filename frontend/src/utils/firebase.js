@@ -1,7 +1,6 @@
-
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
-import { getAuth } from 'firebase/auth';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { getFirestore, doc, setDoc } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDqfcX39JRrpAt-qiep-YTWs8s8BuDskgA",
@@ -13,6 +12,34 @@ const firebaseConfig = {
   measurementId: "G-XHJZG74794"
 };
 
+// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-export const auth = getAuth(app);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// Export Firebase services
+export { auth, db };
+
+// Register new user
+export const registerUser = async (email, password, userData) => {
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    await setDoc(doc(db, "users", userCredential.user.uid), {
+      ...userData,
+      createdAt: new Date(),
+    });
+    return userCredential.user;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Login existing user
+export const loginUser = async (email, password) => {
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    return userCredential.user;
+  } catch (error) {
+    throw error;
+  }
+};

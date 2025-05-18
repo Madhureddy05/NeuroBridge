@@ -1,10 +1,10 @@
-import { Button } from "../components/ui/button";
-import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card";
-import { Link } from "react-router-dom";
-import { ArrowRight, Brain, Calendar, MessageSquare, Smile, Sparkles } from 'lucide-react';
-import WellnessScore from "../components/wellness-score";
+import { Button } from "../components/ui/button"
+import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "../components/ui/card"
+import Link from "next/link"
+import { ArrowRight, Brain, Calendar, MessageSquare, Smile, Sparkles } from 'lucide-react'
+import WellnessScore from "../components/wellness-score"
 
-export default function HomePage() {
+export default function Home() {
   return (
     <div className="space-y-8">
       <section className="py-10">
@@ -62,7 +62,7 @@ export default function HomePage() {
         />
       </div>
     </div>
-  );
+  )
 }
 
 function FeatureCard({ title, description, icon, href }) {
@@ -76,7 +76,7 @@ function FeatureCard({ title, description, icon, href }) {
         <CardDescription>{description}</CardDescription>
       </CardHeader>
       <CardFooter>
-        <Link to={href} className="w-full">
+        <Link href={href} className="w-full">
           <Button className="w-full group">
             Explore
             <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
@@ -84,5 +84,5 @@ function FeatureCard({ title, description, icon, href }) {
         </Link>
       </CardFooter>
     </Card>
-  );
+  )
 }
