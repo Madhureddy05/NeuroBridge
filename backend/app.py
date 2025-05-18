@@ -146,10 +146,6 @@ def get_conversation_history(user_id):
     else:
         return []
 
-def save_conversation_history(user_id, messages):
-    doc_ref = db.collection("conversations").document(user_id)
-    doc_ref.set({"messages": messages})
-
 def get_user_context(user_id):
     journals = [doc.to_dict() for doc in db.collection("journals").where("user_id", "==", user_id).stream()]
     calendars = [doc.to_dict() for doc in db.collection("calendar").where("user_id", "==", user_id).stream()]
@@ -214,7 +210,7 @@ def chatbot():
     chat_history.append({"role": "user", "content": user_message})
 
     # Generate chatbot reply (replace with your actual model call)
-    bot_reply = generate_chatbot_response(chat_history)  # your function to generate reply
+    bot_reply = chat_with_mistral(chat_history)  # your function to generate reply
 
     # Append bot reply
     chat_history.append({"role": "assistant", "content": bot_reply})

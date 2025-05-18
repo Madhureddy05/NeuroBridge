@@ -17,8 +17,8 @@ def get_conversation_history(user_id):
     else:
         return []
 
-def save_conversation_history(user_id, messages):
-    doc_ref = db.collection("conversations").document(user_id)
+def save_conversation_history(messages):
+    doc_ref = db.collection("conversations").document()
     doc_ref.set({"messages": messages})
 
 def get_user_context(user_id):
@@ -29,15 +29,13 @@ def get_user_context(user_id):
         "calendar": calendars
     }
 
-def chat_with_mistral(messages, context_data=None):
+def chat_with_mistral(messages, context_data=None, max_words=50):
     system_prompt = (
         "You are a compassionate cognitive wellness assistant. "
-        "Help the user reflect, manage stress, and suggest improvements to wellbeing. "
-        "Be thoughtful and kind."
+        "Keep your responses brief (under 50 words). "
+        "Help the user reflect and improve wellbeing."
     )
 
-    # Prepare conversation in Mistral prompt format:
-    # We build a dialogue string including system prompt + previous messages
     conversation_text = system_prompt + "\n\n"
     if context_data:
         context_str = json.dumps(context_data, indent=2)
@@ -46,25 +44,24 @@ def chat_with_mistral(messages, context_data=None):
     for msg in messages:
         role = msg["role"]
         content = msg["content"]
-        if role == "user":
-            conversation_text += f"User: {content}\n"
-        else:  # assistant
-            conversation_text += f"Assistant: {content}\n"
+        conversation_text += f"{'User' if role == 'user' else 'Assistant'}: {content}\n"
 
     conversation_text += "Assistant:"
 
-    response = requests.post(
-        "http://localhost:11434/api/generate",
-        json={
-            "model": "mistral",
-            "prompt": conversation_text,
-            "stream": False
-        }
-    )
-
-    return response.json().get("response", "").strip()
-
-def generate_chatbot_response(chat_history):
-    # Dummy example, replace with your Mistral or GPT call
-    last_user_message = chat_history[-1]["content"]
-    return f"Echo: {last_user_message}"
+    try:
+        response = requests.post(
+            "http://localhost:11434/api/generate",
+            json={
+                "model": "mistral",
+                "prompt": conversation_text,
+                "stream": False,
+                "options": {
+                    "num_predict": 40  # lower = shorter
+                }
+            }
+        )
+        full_text = response.json().get("response", "").strip()
+        return " ".join(full_text.split()[:max_words])
+    except requests.RequestException as e:
+        print("LLM Error:", e)
+        return "Sorry, I'm unable to respond right now."

@@ -25,38 +25,53 @@ export default function ChatPage() {
     }
   }, [messages])
 
-  const handleSend = () => {
-    if (!input.trim()) return
+const userId = "demo_user_123";
 
-    const userMessage = {
-      role: "user",
-      content: input,
+const handleSend = async () => {
+  if (!input.trim()) return;
+
+  const userMessage = {
+    role: "user",
+    content: input,
+    timestamp: new Date(),
+  };
+
+  setMessages((prev) => [...prev, userMessage]);
+  setInput("");
+
+  try {
+    const res = await fetch("http://localhost:5000/chatbot", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        message: input,
+      }),
+    });
+
+    const data = await res.json();
+
+    const assistantMessage = {
+      role: "assistant",
+      content: data.response || "Sorry, something went wrong.",
       timestamp: new Date(),
-    }
+    };
 
-    setMessages((prev) => [...prev, userMessage])
-    setInput("")
-
-    setTimeout(() => {
-      const responses = [
-        "I understand how you feel. Work can be stressful sometimes. Have you tried any of our breathing exercises?",
-        "It sounds like you're having a challenging day. Remember to take short breaks to reset your mind.",
-        "That's great to hear! Celebrating small wins is important for maintaining positive mental health.",
-        "I'm here to listen whenever you need to talk. Would you like some suggestions for managing stress?",
-        "Have you tried journaling about this? Sometimes writing down your thoughts can help provide clarity."
-      ]
-
-      const randomResponse = responses[Math.floor(Math.random() * responses.length)]
-
-      const assistantMessage = {
+    setMessages((prev) => [...prev, assistantMessage]);
+  } catch (error) {
+    console.error("Error fetching response:", error);
+    setMessages((prev) => [
+      ...prev,
+      {
         role: "assistant",
-        content: randomResponse,
+        content: "Sorry, I couldn't connect to the assistant. Please try again later.",
         timestamp: new Date(),
-      }
-
-      setMessages((prev) => [...prev, assistantMessage])
-    }, 1000)
+      },
+    ]);
   }
+};
 
   const handleKeyDown = (e) => {
     if (e.key === "Enter") {
