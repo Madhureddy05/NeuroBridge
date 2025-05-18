@@ -1,0 +1,20 @@
+[
+  {
+    "timestamp": "2025-05-18T15:10:06.349047",
+    "sentiment": "negative",
+    "confusion": false,
+    "emergency": false
+  },
+  {
+    "timestamp": "2025-05-18T15:10:29.372392",
+    "sentiment": "negative",
+    "confusion": false,
+    "emergency": false
+  },
+  {
+    "timestamp": "2025-05-18T15:11:23.132255",
+    "sentiment": "negative",
+    "confusion": false,
+    "emergency": false
+  }
+]
