@@ -4,6 +4,7 @@ import requests
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import Flow
 from flask import url_for, session
+from db_storage import save_events_to_json,upload_events_to_firestore
 
 MS_CLIENT_ID = os.getenv("MS_CLIENT_ID", "cee2560c-51ff-48a0-82ea-b1b92fc80396")
 MS_CLIENT_SECRET = os.getenv("MS_CLIENT_SECRET", "your_ms_client_secret_here")
@@ -36,13 +37,31 @@ def get_microsoft_token(code):
     return result
 
 def get_microsoft_calendar_events():
-    token = session.get("ms_access_token")
-    if not token:
+    token_data = session.get("microsoft_token")
+    if not token_data:
         return None
-    headers = {"Authorization": f"Bearer {token}"}
+
+    access_token = token_data.get("access_token")
+    if not access_token:
+        return None
+
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "Prefer": 'outlook.timezone="UTC"'
+    }
+
     response = requests.get(
-        "https://graph.microsoft.com/v1.0/me/calendar/events",
+        "https://graph.microsoft.com/v1.0/me/events?$orderby=start/dateTime&$top=5",
         headers=headers
     )
+
+    if response.status_code != 200:
+        return None
+
     events = response.json().get("value", [])
+
+    if events:
+        save_events_to_json(events)
+        upload_events_to_firestore(events)
+
     return events

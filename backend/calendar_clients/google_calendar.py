@@ -56,4 +56,12 @@ def get_google_calendar_events():
     events_result = service.events().list(
         calendarId="primary", maxResults=5, singleEvents=True, orderBy="startTime"
     ).execute()
-    return events_result.get("items", [])
+    
+    events = events_result.get("items", [])
+    
+    if events:
+        save_events_to_json(events)
+        upload_events_to_firestore(events)
+    
+    return events
+
