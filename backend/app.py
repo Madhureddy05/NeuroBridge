@@ -183,7 +183,10 @@ def chat_with_mistral(messages, context_data=None):
         json={
             "model": "mistral",
             "prompt": conversation_text,
-            "stream": False
+            "stream": False,
+            "options": {
+                    "num_predict": 40  # lower = shorter
+            }
         }
     )
 
